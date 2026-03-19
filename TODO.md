@@ -406,9 +406,9 @@ class TaskRegistry:
 ### 8.1 Level 1 工具测试
 
 - [x] 8.1.1 测试 `search_news`
-- [ ] 8.1.2 测试 `analyze_media`
-- [ ] 8.1.3 测试 `query_sentiment`
-- [ ] 8.1.4 测试 `check_spider_status`
+- [x] 8.1.2 测试 `analyze_media`
+- [x] 8.1.3 测试 `query_sentiment`
+- [x] 8.1.4 测试 `check_spider_status`
 
 ### 8.2 Level 2 工具测试 (异步模式)
 
@@ -504,8 +504,8 @@ class TaskRegistry:
 | 五：异步任务基础设施 | 10 | 10 | 0 |
 | 六：Level 2 Tools | 37 | 37 | 0 |
 | 七：Level 3 Tools | 15 | 15 | 0 |
-| 八：测试 | 19 | 0 | 19 |
-| **总计** | **98** | **82** | **16** |
+| 八：测试 | 19 | 4 | 15 |
+| **总计** | **98** | **86** | **12** |
 
 ---
 
