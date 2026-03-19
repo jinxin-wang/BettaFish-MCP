@@ -1,6 +1,6 @@
 # BettaFish MCP 改造任务清单
 
-根据设计文档 MCP_TRANSFORM_GUIDE.md 和 TODO.md 的任务列表，一个任务一个任务的完成。不要同时做多个任务。在开始任务前要做计划，然后依照计划好的方案来执行。完成任务后更新 TODO.md 将任务设置为完成，[ ] 代表未完成，[x] 代表完成任务。如果上下文很长超过 35%，那么要压缩会话和上下文，命令是`/compact`
+根据设计文档 MCP_TRANSFORM_GUIDE.md 和 TODO.md 的任务列表，逐个任务完成，不要同时做多个任务。在开始每个任务前要做计划，然后依照计划好的方案来执行。完成任务后更新 TODO.md 将任务设置为完成，[ ] 代表未完成，[x] 代表完成任务。完成任务要"git commit"将开发和修改的内容提交到仓库。如果上下文很长超过 35%，那么要压缩会话和上下文，命令是`/compact`
 
 ## MCP 工具三层架构
 
@@ -387,7 +387,7 @@ class TaskRegistry:
 
 ### 7.6 Resources 扩展
 
-- [ ] 7.6.1 添加 `bettafish://forum/engines` - ForumEngine引擎状态
+- [x] 7.6.1 添加 `bettafish://forum/engines` - ForumEngine引擎状态
 - [ ] 7.6.2 添加 `bettafish://forum/roles` - 各Agent角色说明
 - [ ] 7.6.3 添加 `bettafish://forum/workflow` - 协作工作流程
 

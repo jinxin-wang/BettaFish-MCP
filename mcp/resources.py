@@ -98,6 +98,12 @@ class ResourceRegistry:
             description="可用的报告模板",
             content_provider=self._get_report_templates,
         )
+        self.register(
+            uri="bettafish://forum/engines",
+            name="forum_engines",
+            description="ForumEngine引擎状态",
+            content_provider=self._get_forum_engines,
+        )
 
     def _get_server_info(self) -> Dict[str, Any]:
         return {
@@ -286,6 +292,54 @@ class ResourceRegistry:
                 {"id": "platform", "name": "平台报告", "description": "单平台分析模板"},
             ],
             "formats": ["html", "json", "pdf"],
+        }
+
+    def _get_forum_engines(self) -> Dict[str, Any]:
+        return {
+            "forum_engine": {
+                "name": "ForumEngine",
+                "description": "多Agent协作论坛引擎",
+                "role": "主持人协调者",
+                "components": {
+                    "log_monitor": {
+                        "name": "LogMonitor",
+                        "description": "监控三个引擎的日志文件，检测SummaryNode输出",
+                        "monitors": ["query.log", "media.log", "insight.log"],
+                    },
+                    "forum_host": {
+                        "name": "ForumHost",
+                        "description": "LLM主持人，生成战略引导",
+                        "trigger": "每5条Agent发言触发一次",
+                    },
+                    "forum_reader": {
+                        "name": "forum_reader",
+                        "description": "Agent读取论坛日志的工具",
+                    },
+                },
+            },
+            "participating_engines": [
+                {
+                    "name": "QueryEngine",
+                    "alias": "QUERY",
+                    "description": "新闻舆情搜索引擎",
+                    "log_file": "query.log",
+                    "capabilities": ["search_news", "reflection_loop"],
+                },
+                {
+                    "name": "MediaEngine",
+                    "alias": "MEDIA",
+                    "description": "多模态内容分析引擎",
+                    "log_file": "media.log",
+                    "capabilities": ["analyze_media", "reflection_loop"],
+                },
+                {
+                    "name": "InsightEngine",
+                    "alias": "INSIGHT",
+                    "description": "舆情情感分析引擎",
+                    "log_file": "insight.log",
+                    "capabilities": ["query_sentiment", "reflection_loop"],
+                },
+            ],
         }
 
     def register(
