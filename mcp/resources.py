@@ -104,6 +104,12 @@ class ResourceRegistry:
             description="ForumEngine引擎状态",
             content_provider=self._get_forum_engines,
         )
+        self.register(
+            uri="bettafish://forum/roles",
+            name="forum_roles",
+            description="各Agent角色说明",
+            content_provider=self._get_forum_roles,
+        )
 
     def _get_server_info(self) -> Dict[str, Any]:
         return {
@@ -340,6 +346,87 @@ class ResourceRegistry:
                     "capabilities": ["query_sentiment", "reflection_loop"],
                 },
             ],
+        }
+
+    def _get_forum_roles(self) -> Dict[str, Any]:
+        return {
+            "roles": [
+                {
+                    "role": "HOST",
+                    "name": "论坛主持人 (ForumHost)",
+                    "model": "Qwen3-235B",
+                    "description": "LLM驱动的战略协调者",
+                    "responsibilities": [
+                        "分析所有Agent发言，识别研究进展",
+                        "生成战略引导，指引下一轮研究方向",
+                        "推动多轮反思循环直到完成",
+                    ],
+                    "trigger": "每5条Agent发言触发一次引导生成",
+                    "tools": ["forum_reader"],
+                },
+                {
+                    "role": "QUERY",
+                    "name": "QueryEngine Agent",
+                    "engine": "QueryEngine",
+                    "description": "新闻舆情搜索专家",
+                    "responsibilities": [
+                        "进行国内外新闻广度搜索",
+                        "基于主持人引导进行专项搜索",
+                        "多轮反思循环深入分析",
+                    ],
+                    "tools": [
+                        "execute_search_tool",
+                        "reflection_loop",
+                        "forum_reader",
+                    ],
+                    "reflection_rounds": 3,
+                },
+                {
+                    "role": "MEDIA",
+                    "name": "MediaEngine Agent",
+                    "engine": "MediaEngine",
+                    "description": "多模态内容分析专家",
+                    "responsibilities": [
+                        "分析图片、视频等多模态内容",
+                        "识别媒体传播特征和模式",
+                        "基于主持人引导调整研究重点",
+                    ],
+                    "tools": [
+                        "execute_search_tool",
+                        "reflection_loop",
+                        "forum_reader",
+                    ],
+                    "reflection_rounds": 3,
+                },
+                {
+                    "role": "INSIGHT",
+                    "name": "InsightEngine Agent",
+                    "engine": "InsightEngine",
+                    "description": "舆情情感分析专家",
+                    "responsibilities": [
+                        "挖掘私有数据库舆情数据",
+                        "分析情感趋势和热点",
+                        "基于主持人引导深化分析",
+                    ],
+                    "tools": [
+                        "execute_search_tool",
+                        "reflection_loop",
+                        "forum_reader",
+                    ],
+                    "reflection_rounds": 3,
+                },
+            ],
+            "collaboration_model": {
+                "type": "sequential_collaboration",
+                "description": "三个Agent并行研究，定期通过主持人协调",
+                "flow": [
+                    "1. 初步分析：各Agent使用专属工具进行概览搜索",
+                    "2. 策略制定：基于初步结果制定分块研究策略",
+                    "3. 论坛协作：ForumEngine监控发言，生成战略引导",
+                    "4. 深度研究：各Agent基于主持人引导进行专项搜索",
+                    "5. 循环迭代：重复步骤3-4直到所有Agent完成研究",
+                ],
+            },
         }
 
     def register(
