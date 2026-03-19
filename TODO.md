@@ -430,8 +430,8 @@ class TaskRegistry:
 - [x] 8.3.3 测试 `stop_forum_research`
 - [x] 8.3.4 测试 `get_forum_discussion`
 - [x] 8.3.5 测试 `start_report` / `get_report_status` / `get_report_result`
-- [ ] 8.3.6 测试完整协作流程
-- [ ] 8.3.7 测试并发运行多个引擎
+- [x] 8.3.6 测试完整协作流程
+- [x] 8.3.7 测试并发运行多个引擎
 
 ### 8.4 异步任务基础设施测试
 
