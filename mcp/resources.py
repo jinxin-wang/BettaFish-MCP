@@ -8,6 +8,8 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 import threading
 
+from mcp.task_registry import TaskStatus, get_task_registry
+
 
 class MCPResource:
     """Represents an MCP resource."""
@@ -115,6 +117,18 @@ class ResourceRegistry:
             name="forum_workflow",
             description="协作工作流程",
             content_provider=self._get_forum_workflow,
+        )
+        self.register(
+            uri="bettafish://tasks/status",
+            name="tasks_status",
+            description="当前任务状态概览",
+            content_provider=self._get_tasks_status,
+        )
+        self.register(
+            uri="bettafish://tasks/list",
+            name="tasks_list",
+            description="任务列表",
+            content_provider=self._get_tasks_list,
         )
 
     def _get_server_info(self) -> Dict[str, Any]:
@@ -546,6 +560,78 @@ class ResourceRegistry:
                 },
                 "stop_forum_research": {"description": "停止论坛研究"},
             },
+        }
+
+    def _get_tasks_status(self) -> Dict[str, Any]:
+        registry = get_task_registry()
+        tasks = registry.list_tasks()
+
+        status_counts = {
+            "pending": 0,
+            "running": 0,
+            "completed": 0,
+            "failed": 0,
+            "cancelled": 0,
+        }
+        type_counts: Dict[str, int] = {}
+
+        for task in tasks:
+            status = task.get("status", "unknown")
+            if status in status_counts:
+                status_counts[status] += 1
+
+            task_type = task.get("task_type", "unknown")
+            if task_type not in type_counts:
+                type_counts[task_type] = 0
+            type_counts[task_type] += 1
+
+        running_tasks = [t for t in tasks if t.get("status") == "running"]
+
+        return {
+            "total": len(tasks),
+            "status": status_counts,
+            "by_type": type_counts,
+            "running_tasks": [
+                {
+                    "task_id": t.get("task_id"),
+                    "task_type": t.get("task_type"),
+                    "progress": t.get("progress", 0),
+                    "stage": t.get("stage", ""),
+                }
+                for t in running_tasks[:5]
+            ],
+            "updated_at": datetime.now().isoformat(),
+        }
+
+    def _get_tasks_list(
+        self, task_type: Optional[str] = None, status: Optional[str] = None
+    ) -> Dict[str, Any]:
+        registry = get_task_registry()
+        tasks = registry.list_tasks(task_type=task_type, status=status)
+
+        simplified_tasks = []
+        for task in tasks:
+            simplified_tasks.append(
+                {
+                    "task_id": task.get("task_id"),
+                    "task_type": task.get("task_type"),
+                    "status": task.get("status"),
+                    "progress": task.get("progress", 0),
+                    "stage": task.get("stage", ""),
+                    "created_at": task.get("created_at"),
+                    "started_at": task.get("started_at"),
+                    "completed_at": task.get("completed_at"),
+                }
+            )
+
+        return {
+            "tasks": simplified_tasks,
+            "count": len(simplified_tasks),
+            "filters": {
+                "task_type": task_type,
+                "status": status,
+            },
+            "updated_at": datetime.now().isoformat(),
         }
 
     def register(

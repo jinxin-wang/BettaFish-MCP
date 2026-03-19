@@ -290,8 +290,8 @@ class TaskRegistry:
 
 ### 6.10 Resources 扩展
 
-- [ ] 6.10.1 添加 `bettafish://tasks/status` - 当前任务状态
-- [ ] 6.10.2 添加 `bettafish://tasks/list` - 任务列表
+- [x] 6.10.1 添加 `bettafish://tasks/status` - 当前任务状态
+- [x] 6.10.2 添加 `bettafish://tasks/list` - 任务列表
 
 ---
 
