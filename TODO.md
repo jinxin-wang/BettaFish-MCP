@@ -6,9 +6,9 @@
 
 | 层级 | 描述 | 执行模式 | 工具数量 |
 |------|------|---------|---------|
-| **Level 1** | 单次搜索查询 (单次工具调用) | 同步 (秒级) | 8个 ✅ 已完成 |
-| **Level 2** | 单Agent完整分析流程 (多轮反思+报告生成) | 异步 (分钟级) | 15个 🔄 待实现 |
-| **Level 3** | 多Agent协作+报告生成 (ForumEngine+ReportEngine) | 异步 (十分钟级) | 10个 🔄 待实现 |
+| **Level 1** | 单次搜索查询 (单次工具调用) | 同步 (秒级) | 5个 ✅ 已完成 |
+| **Level 2** | 单Agent完整分析流程 + 爬虫异步 | 异步 (分钟级) | 35个 ✅ 已完成 |
+| **Level 3** | 多Agent协作+报告生成 (ForumEngine+ReportEngine) | 异步 (十分钟级) | 10个 ✅ 已完成 |
 
 ---
 
@@ -49,8 +49,14 @@
 - [x] 2.3 实现媒体分析工具 `analyze_media`（mcp/tools/media.py）
 - [x] 2.4 实现舆情查询工具 `query_sentiment`（mcp/tools/sentiment.py）
 - [x] 2.5 实现报告生成工具 `generate_report`（mcp/tools/report.py）
-- [x] 2.6 实现爬虫工具 `crawl_data`, `crawl_topics`, `check_spider_status`（mcp/tools/crawl.py）
-- [x] 2.7 实现情感分析工具 `analyze_sentiment_texts`, `query_trending`（mcp/tools/sentiment.py）
+- [x] 2.6 实现爬虫状态检查 `check_spider_status`（mcp/tools/crawl.py）
+
+## 阶段二续：爬虫工具异步化 ✅ 已完成
+
+- [x] 2.7 实现 `start_crawl_data` 系列（mcp/tools/crawl.py）
+- [x] 2.8 实现 `start_crawl_topics` 系列（mcp/tools/crawl.py）
+- [x] 2.9 实现 `start_crawl_social` 系列（mcp/tools/crawl.py）
+- [x] 2.10 更新 blueprint.py 注册新异步工具
 
 ## 阶段三：Resources 和 Prompts ✅ 已完成
 
@@ -134,7 +140,7 @@ class TaskRegistry:
 
 ---
 
-## 阶段六：Level 2 Tools - 单Agent完整分析流程 (异步模式) 🔄 待实现
+## 阶段六：Level 2 Tools - 单Agent完整分析流程 + 爬虫异步 (异步模式) ✅ 已完成
 
 ### 6.1 QueryEngine 异步工具
 
@@ -154,29 +160,49 @@ class TaskRegistry:
 | 6.2.2 | `get_media_full_status` | 查询分析进度 | ✅ |
 | 6.2.3 | `get_media_full_result` | 获取分析结果 | ✅ |
 | 6.2.4 | `subscribe_media_full` | 订阅 SSE 实时进度 | ✅ |
-| 6.2.5 | `cancel_media_full` | 取消分析任务 | ✅ |
+| 6.2.5 | `cancel_media_full` | 取消媒体分析任务 | ✅ |
 
 ### 6.3 InsightEngine 异步工具
 
 | 任务 | 工具名 | 功能 | 状态 |
 |------|--------|------|------|
 | 6.3.1 | `start_sentiment_full` | 提交 InsightEngine 完整分析任务 | ✅ |
-| 6.3.2 | `get_sentiment_full_status` | 查询分析进度 | ✅ |
-| 6.3.3 | `get_sentiment_full_result` | 获取分析结果 | ✅ |
+| 6.3.2 | `get_sentiment_full_status` | 查询舆情分析进度 | ✅ |
+| 6.3.3 | `get_sentiment_full_result` | 获取舆情分析结果 | ✅ |
 | 6.3.4 | `subscribe_sentiment_full` | 订阅 SSE 实时进度 | ✅ |
-| 6.3.5 | `cancel_sentiment_full` | 取消分析任务 | ✅ |
+| 6.3.5 | `cancel_sentiment_full` | 取消舆情分析任务 | ✅ |
 
-### 6.4 MindSpider 异步工具
+### 6.4 MindSpider 异步工具 - crawl_data
 
 | 任务 | 工具名 | 功能 | 状态 |
 |------|--------|------|------|
-| 6.4.1 | `start_crawl_full` | 提交完整爬取+分析任务 | ✅ |
-| 6.4.2 | `get_crawl_full_status` | 查询爬取进度 | ✅ |
-| 6.4.3 | `get_crawl_full_result` | 获取爬取结果 | ✅ |
-| 6.4.4 | `subscribe_crawl_full` | 订阅 SSE 实时进度 | ✅ |
-| 6.4.5 | `cancel_crawl_full` | 取消爬取任务 | ✅ |
+| 6.4.1 | `start_crawl_data` | 提交数据爬取任务 | ✅ |
+| 6.4.2 | `get_crawl_data_status` | 查询爬取进度 (轮询) | ✅ |
+| 6.4.3 | `get_crawl_data_result` | 获取爬取结果 | ✅ |
+| 6.4.4 | `subscribe_crawl_data` | 订阅 SSE 实时进度 | ✅ |
+| 6.4.5 | `cancel_crawl_data` | 取消爬取任务 | ✅ |
 
-### 6.5 工具参数设计
+### 6.5 MindSpider 异步工具 - crawl_topics
+
+| 任务 | 工具名 | 功能 | 状态 |
+|------|--------|------|------|
+| 6.5.1 | `start_crawl_topics` | 提交热点话题提取任务 | ✅ |
+| 6.5.2 | `get_crawl_topics_status` | 查询话题提取进度 | ✅ |
+| 6.5.3 | `get_crawl_topics_result` | 获取话题提取结果 | ✅ |
+| 6.5.4 | `subscribe_crawl_topics` | 订阅 SSE 实时进度 | ✅ |
+| 6.5.5 | `cancel_crawl_topics` | 取消话题提取任务 | ✅ |
+
+### 6.6 MindSpider 异步工具 - crawl_social
+
+| 任务 | 工具名 | 功能 | 状态 |
+|------|--------|------|------|
+| 6.6.1 | `start_crawl_social` | 提交社交媒体爬取任务 | ✅ |
+| 6.6.2 | `get_crawl_social_status` | 查询爬取进度 | ✅ |
+| 6.6.3 | `get_crawl_social_result` | 获取爬取结果 | ✅ |
+| 6.6.4 | `subscribe_crawl_social` | 订阅 SSE 实时进度 | ✅ |
+| 6.6.5 | `cancel_crawl_social` | 取消爬取任务 | ✅ |
+
+### 6.7 工具参数设计
 
 ```python
 # start_search_full / start_media_full / start_sentiment_full 通用参数
@@ -188,18 +214,35 @@ class TaskRegistry:
     "timeout": 600                         # 超时时间(秒)
 }
 
-# start_crawl_full 参数
+# start_crawl_data 参数
 {
     "keywords": ["关键词1", "关键词2"],     # 必填
     "platforms": ["xhs", "dy", "wb"],      # 平台列表
-    "crawl_then_analyze": True,            # 爬取后是否分析
     "max_keywords": 50,
     "max_notes": 50,
+    "test_mode": False,
+    "timeout": 3600
+}
+
+# start_crawl_topics 参数
+{
+    "keywords_count": 100,                 # 关键词数量
+    "extract_date": "2026-03-19",          # 提取日期
+    "timeout": 600
+}
+
+# start_crawl_social 参数
+{
+    "platforms": ["xhs", "dy", "wb"],      # 平台列表
+    "max_keywords": 30,
+    "max_notes": 20,
+    "target_date": "2026-03-19",
+    "test_mode": False,
     "timeout": 3600
 }
 ```
 
-### 6.6 返回值设计
+### 6.8 返回值设计
 
 ```json
 // start_* 返回
@@ -239,16 +282,16 @@ class TaskRegistry:
 }
 ```
 
-### 6.7 Blueprint 注册
+### 6.9 Blueprint 注册
 
-- [x] 6.7.1 在 `_get_tool_descriptions()` 添加 Level 2 工具描述
-- [x] 6.7.2 在 `tool_map` 中注册 Level 2 工具
-- [x] 6.7.3 在 `mcp/tools/__init__.py` 导出新工具
+- [x] 6.9.1 在 `_get_tool_descriptions()` 添加 Level 2 工具描述
+- [x] 6.9.2 在 `tool_map` 中注册 Level 2 工具
+- [x] 6.9.3 在 `mcp/tools/__init__.py` 导出新工具
 
-### 6.8 Resources 扩展
+### 6.10 Resources 扩展
 
-- [ ] 6.8.1 添加 `bettafish://tasks/status` - 当前任务状态
-- [ ] 6.8.2 添加 `bettafish://tasks/list` - 任务列表
+- [ ] 6.10.1 添加 `bettafish://tasks/status` - 当前任务状态
+- [ ] 6.10.2 添加 `bettafish://tasks/list` - 任务列表
 
 ---
 
@@ -339,8 +382,8 @@ class TaskRegistry:
 
 ### 7.5 Blueprint 注册
 
-- [ ] 7.5.1 在 `_get_tool_descriptions()` 添加 Level 3 工具描述
-- [ ] 7.5.2 在 `tool_map` 中注册 Level 3 工具
+- [x] 7.5.1 在 `_get_tool_descriptions()` 添加 Level 3 工具描述
+- [x] 7.5.2 在 `tool_map` 中注册 Level 3 工具
 
 ### 7.6 Resources 扩展
 
@@ -365,7 +408,7 @@ class TaskRegistry:
 - [ ] 8.1.1 测试 `search_news`
 - [ ] 8.1.2 测试 `analyze_media`
 - [ ] 8.1.3 测试 `query_sentiment`
-- [ ] 8.1.4 测试 `crawl_data`
+- [ ] 8.1.4 测试 `check_spider_status`
 
 ### 8.2 Level 2 工具测试 (异步模式)
 
@@ -373,10 +416,12 @@ class TaskRegistry:
 - [ ] 8.2.2 测试 `subscribe_search_full` SSE 订阅
 - [ ] 8.2.3 测试 `start_media_full` 系列
 - [ ] 8.2.4 测试 `start_sentiment_full` 系列
-- [ ] 8.2.5 测试 `start_crawl_full` 系列
-- [ ] 8.2.6 测试超时处理
-- [ ] 8.2.7 测试任务取消
-- [ ] 8.2.8 测试报告保存功能
+- [ ] 8.2.5 测试 `start_crawl_data` 系列
+- [ ] 8.2.6 测试 `start_crawl_topics` 系列
+- [ ] 8.2.7 测试 `start_crawl_social` 系列
+- [ ] 8.2.8 测试超时处理
+- [ ] 8.2.9 测试任务取消
+- [ ] 8.2.10 测试报告保存功能
 
 ### 8.3 Level 3 工具测试 (异步模式)
 
@@ -420,9 +465,11 @@ class TaskRegistry:
     ├── 6.1.1-6.1.5 QueryEngine 异步工具
     ├── 6.2.1-6.2.5 MediaEngine 异步工具
     ├── 6.3.1-6.3.5 InsightEngine 异步工具
-    ├── 6.4.1-6.4.5 MindSpider 异步工具
+    ├── 6.4.1-6.4.5 MindSpider crawl_data 异步工具
+    ├── 6.5.1-6.5.5 MindSpider crawl_topics 异步工具
+    ├── 6.6.1-6.6.5 MindSpider crawl_social 异步工具
     │
-    └── 6.7.1-6.7.3 Blueprint + __init__ 注册
+    └── 6.9.1-6.9.3 Blueprint + __init__ 注册
             │
             ▼
 阶段七 (Level 3 Tools)
@@ -450,14 +497,15 @@ class TaskRegistry:
 | 阶段 | 总任务数 | 已完成 | 待实现 |
 |------|---------|-------|-------|
 | 一：基础设施 | 3 | 3 | 0 |
-| 二：Level 1 Tools | 7 | 7 | 0 |
+| 二：Level 1 Tools | 6 | 6 | 0 |
+| 二续：爬虫异步化 | 4 | 4 | 0 |
 | 三：Resources/Prompts | 2 | 2 | 0 |
 | 四：集成 | 2 | 2 | 0 |
 | 五：异步任务基础设施 | 10 | 10 | 0 |
-| 六：Level 2 Tools | 25 | 20 | 5 |
-| 七：Level 3 Tools | 10 | 10 | 0 |
+| 六：Level 2 Tools | 37 | 37 | 0 |
+| 七：Level 3 Tools | 15 | 10 | 5 |
 | 八：测试 | 19 | 0 | 19 |
-| **总计** | **78** | **54** | **24** |
+| **总计** | **98** | **74** | **24** |
 
 ---
 
@@ -467,12 +515,18 @@ class TaskRegistry:
 mcp/
 ├── task_registry.py      # 异步任务注册中心 (NEW)
 └── tools/
-    ├── search.py         # 扩展：Level 1 同步 + Level 2 异步
-    ├── media.py         # 扩展：Level 1 同步 + Level 2 异步
-    ├── sentiment.py     # 扩展：Level 1 同步 + Level 2 异步
-    ├── report.py        # 扩展：Level 3 异步
-    ├── crawl.py         # 扩展：Level 1/2 异步
-    └── forum.py         # NEW：Level 3 ForumEngine 协作
+    ├── search.py         # Level 1: search_news
+    │                     # Level 2: start_search_full + 4个异步操作
+    ├── media.py          # Level 1: analyze_media
+    │                     # Level 2: start_media_full + 4个异步操作
+    ├── sentiment.py      # Level 1: query_sentiment, analyze_sentiment_texts, query_trending
+    │                     # Level 2: start_sentiment_full + 4个异步操作
+    ├── report.py         # Level 1: generate_report
+    ├── crawl.py          # Level 1: check_spider_status
+    │                     # Level 2: start_crawl_data + 4个异步操作
+    │                     # Level 2: start_crawl_topics + 4个异步操作
+    │                     # Level 2: start_crawl_social + 4个异步操作
+    └── forum.py          # Level 3: ForumEngine协作 + ReportEngine异步
 
 logs/
 └── mcp_tasks/           # 任务持久化目录 (NEW)
