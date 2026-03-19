@@ -23,6 +23,7 @@ from loguru import logger
 import importlib
 from pathlib import Path
 from MindSpider.main import MindSpider
+from mcp.blueprint import mcp_bp
 
 # 导入ReportEngine
 try:
@@ -75,6 +76,8 @@ if REPORT_ENGINE_AVAILABLE:
     logger.info("ReportEngine接口已注册")
 else:
     logger.info("ReportEngine不可用，跳过接口注册")
+
+app.register_blueprint(mcp_bp, url_prefix='/mcp')
 
 # 创建日志目录
 LOG_DIR = Path('logs')
