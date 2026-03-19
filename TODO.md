@@ -412,13 +412,13 @@ class TaskRegistry:
 
 ### 8.2 Level 2 工具测试 (异步模式)
 
-- [ ] 8.2.1 测试 `start_search_full` / `get_search_full_status` / `get_search_full_result`
-- [ ] 8.2.2 测试 `subscribe_search_full` SSE 订阅
-- [ ] 8.2.3 测试 `start_media_full` 系列
-- [ ] 8.2.4 测试 `start_sentiment_full` 系列
-- [ ] 8.2.5 测试 `start_crawl_data` 系列
-- [ ] 8.2.6 测试 `start_crawl_topics` 系列
-- [ ] 8.2.7 测试 `start_crawl_social` 系列
+- [x] 8.2.1 测试 `start_search_full` / `get_search_full_status` / `get_search_full_result`
+- [x] 8.2.2 测试 `subscribe_search_full` SSE 订阅
+- [x] 8.2.3 测试 `start_media_full` 系列
+- [x] 8.2.4 测试 `start_sentiment_full` 系列
+- [x] 8.2.5 测试 `start_crawl_data` 系列
+- [x] 8.2.6 测试 `start_crawl_topics` 系列
+- [x] 8.2.7 测试 `start_crawl_social` 系列
 - [ ] 8.2.8 测试超时处理
 - [ ] 8.2.9 测试任务取消
 - [ ] 8.2.10 测试报告保存功能
@@ -504,8 +504,8 @@ class TaskRegistry:
 | 五：异步任务基础设施 | 10 | 10 | 0 |
 | 六：Level 2 Tools | 37 | 37 | 0 |
 | 七：Level 3 Tools | 15 | 15 | 0 |
-| 八：测试 | 19 | 4 | 15 |
-| **总计** | **98** | **86** | **12** |
+| 八：测试 | 19 | 11 | 8 |
+| **总计** | **98** | **93** | **5** |
 
 ---
 

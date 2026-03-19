@@ -516,35 +516,551 @@ def subscribe_crawl_full(task_id: str) -> Dict[str, Any]:
     }
 
 
-def cancel_crawl_full(task_id: str) -> Dict[str, Any]:
-    """
-    取消爬取任务。
+def _run_crawl_data_task(
+    task_id: str,
+    keywords: List[str],
+    platforms: List[str],
+    max_keywords: int,
+    max_notes: int,
+    test_mode: bool,
+    progress_callback: Optional[Callable] = None,
+):
+    """后台执行数据爬取任务"""
+    registry = get_task_registry()
+    start_time = time.time()
 
-    Args:
-        task_id: 任务ID
+    try:
+        registry.update_progress(task_id, 5, "initializing", "初始化 MindSpider...")
 
-    Returns:
-        {
-            "success": true,
-            "message": "..."
+        from MindSpider.main import MindSpider
+
+        spider = MindSpider()
+
+        if not spider.check_config():
+            raise Exception("MindSpider config check failed")
+
+        registry.update_progress(task_id, 10, "config_checked", "配置检查通过...")
+
+        if not spider.check_database_connection():
+            raise Exception("Database connection failed")
+
+        registry.update_progress(task_id, 15, "db_connected", "数据库连接正常...")
+
+        target = date.today()
+        registry.update_progress(
+            task_id, 20, "starting_crawl", f"开始爬取 {len(keywords)} 个关键词..."
+        )
+
+        spider.run_complete_workflow(
+            target_date=target,
+            platforms=platforms,
+            keywords_count=len(keywords),
+            max_keywords=max_keywords,
+            max_notes=max_notes,
+            test_mode=test_mode,
+        )
+
+        registry.update_progress(task_id, 80, "crawl_completed", "爬取完成")
+
+        execution_time = time.time() - start_time
+
+        result = {
+            "keywords": keywords,
+            "platforms": platforms,
+            "target_date": str(target),
+            "max_keywords": max_keywords,
+            "max_notes": max_notes,
+            "execution_time_seconds": round(execution_time, 2),
+            "completed_at": datetime.now().isoformat(),
         }
-    """
+
+        registry.complete_task(task_id, result)
+
+    except Exception as e:
+        logger.exception(f"Crawl data task failed: {task_id}")
+        registry.fail_task(task_id, str(e))
+
+
+def _run_crawl_topics_task(
+    task_id: str,
+    keywords_count: int,
+    extract_date: str,
+    progress_callback: Optional[Callable] = None,
+):
+    """后台执行话题提取任务"""
+    registry = get_task_registry()
+    start_time = time.time()
+
+    try:
+        registry.update_progress(task_id, 5, "initializing", "初始化 MindSpider...")
+
+        from MindSpider.main import MindSpider
+
+        spider = MindSpider()
+
+        if not spider.check_config():
+            raise Exception("MindSpider config check failed")
+
+        registry.update_progress(task_id, 10, "config_checked", "配置检查通过...")
+
+        target = date.today()
+        if extract_date:
+            target = datetime.strptime(extract_date, "%Y-%m-%d").date()
+
+        registry.update_progress(
+            task_id,
+            20,
+            "starting_extraction",
+            f"开始提取 {keywords_count} 个热点话题...",
+        )
+
+        spider.run_broad_topic_extraction(
+            extract_date=target, keywords_count=keywords_count
+        )
+
+        registry.update_progress(task_id, 80, "extraction_completed", "话题提取完成")
+
+        execution_time = time.time() - start_time
+
+        result = {
+            "keywords_count": keywords_count,
+            "extract_date": str(target),
+            "execution_time_seconds": round(execution_time, 2),
+            "completed_at": datetime.now().isoformat(),
+        }
+
+        registry.complete_task(task_id, result)
+
+    except Exception as e:
+        logger.exception(f"Crawl topics task failed: {task_id}")
+        registry.fail_task(task_id, str(e))
+
+
+def _run_crawl_social_task(
+    task_id: str,
+    platforms: List[str],
+    max_keywords: int,
+    max_notes: int,
+    target_date: str,
+    test_mode: bool,
+    progress_callback: Optional[Callable] = None,
+):
+    """后台执行社交媒体爬取任务"""
+    registry = get_task_registry()
+    start_time = time.time()
+
+    try:
+        registry.update_progress(task_id, 5, "initializing", "初始化 MindSpider...")
+
+        from MindSpider.main import MindSpider
+
+        spider = MindSpider()
+
+        if not spider.check_config():
+            raise Exception("MindSpider config check failed")
+
+        registry.update_progress(task_id, 10, "config_checked", "配置检查通过...")
+
+        if not spider.check_database_connection():
+            raise Exception("Database connection failed")
+
+        registry.update_progress(task_id, 15, "db_connected", "数据库连接正常...")
+
+        target = date.today()
+        if target_date:
+            target = datetime.strptime(target_date, "%Y-%m-%d").date()
+
+        registry.update_progress(
+            task_id, 20, "starting_social_crawl", f"开始社交媒体爬取..."
+        )
+
+        spider.run_deep_sentiment_crawling(
+            target_date=target,
+            platforms=platforms,
+            max_keywords=max_keywords,
+            max_notes=max_notes,
+            test_mode=test_mode,
+        )
+
+        registry.update_progress(task_id, 80, "crawl_completed", "社交媒体爬取完成")
+
+        execution_time = time.time() - start_time
+
+        result = {
+            "platforms": platforms,
+            "target_date": str(target),
+            "max_keywords": max_keywords,
+            "max_notes": max_notes,
+            "execution_time_seconds": round(execution_time, 2),
+            "completed_at": datetime.now().isoformat(),
+        }
+
+        registry.complete_task(task_id, result)
+
+    except Exception as e:
+        logger.exception(f"Crawl social task failed: {task_id}")
+        registry.fail_task(task_id, str(e))
+
+
+def start_crawl_data(
+    keywords: List[str],
+    platforms: List[str] = None,
+    max_keywords: int = 50,
+    max_notes: int = 50,
+    test_mode: bool = False,
+    timeout: int = 3600,
+    **kwargs,
+) -> Dict[str, Any]:
+    """提交数据爬取任务（异步模式）"""
+    logger.info(f"MCP start_crawl_data: keywords={keywords}, platforms={platforms}")
+
+    if platforms is None:
+        platforms = ["xhs", "dy", "wb"]
+
+    normalized_platforms = [p.lower() for p in platforms]
+    for p in normalized_platforms:
+        if p not in SUPPORTED_PLATFORMS:
+            return {
+                "success": False,
+                "error": f"Unsupported platform: {p}. Supported: {list(SUPPORTED_PLATFORMS.keys())}",
+                "platforms": platforms,
+            }
+
     registry = get_task_registry()
 
-    task = registry.get_task(task_id)
-    if task is None:
+    try:
+        task_id = registry.create_task(
+            task_type=TaskType.CRAWL_DATA.value,
+            params={
+                "keywords": keywords,
+                "platforms": normalized_platforms,
+                "max_keywords": max_keywords,
+                "max_notes": max_notes,
+                "test_mode": test_mode,
+            },
+            timeout=timeout,
+        )
+
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        executor.submit(
+            _run_crawl_data_task,
+            task_id,
+            keywords,
+            normalized_platforms,
+            max_keywords,
+            max_notes,
+            test_mode,
+        )
+
+        return {
+            "success": True,
+            "task_id": task_id,
+            "status": "pending",
+            "message": "数据爬取任务已提交，请使用 get_crawl_data_status 查询进度",
+            "endpoints": {
+                "status": f"/mcp/task/{task_id}/status",
+                "result": f"/mcp/task/{task_id}/result",
+                "stream": f"/mcp/task/{task_id}/stream",
+                "cancel": f"/mcp/task/{task_id}/cancel",
+            },
+        }
+
+    except RuntimeError as e:
         return {
             "success": False,
-            "error": f"Task not found: {task_id}",
+            "error": str(e),
+            "message": "并发任务已满，请稍后再试",
         }
+    except Exception as e:
+        logger.exception(f"Failed to start crawl data task: {e}")
+        return {"success": False, "error": str(e)}
+
+
+def get_crawl_data_status(task_id: str) -> Dict[str, Any]:
+    """查询数据爬取进度"""
+    registry = get_task_registry()
+    status = registry.get_task_status(task_id)
+
+    if status is None:
+        return {"success": False, "error": f"Task not found: {task_id}"}
+
+    return {"success": True, **status}
+
+
+def get_crawl_data_result(task_id: str) -> Dict[str, Any]:
+    """获取数据爬取结果"""
+    registry = get_task_registry()
+    result = registry.get_task_result(task_id)
+
+    if result is None:
+        return {"success": False, "error": f"Task not found: {task_id}"}
+
+    return {"success": True, **result}
+
+
+def subscribe_crawl_data(task_id: str) -> Dict[str, Any]:
+    """订阅数据爬取 SSE 实时进度"""
+    registry = get_task_registry()
+    task = registry.get_task(task_id)
+
+    if task is None:
+        return {"success": False, "error": f"Task not found: {task_id}"}
+
+    return {
+        "success": True,
+        "stream_url": f"/mcp/task/{task_id}/stream",
+        "message": "请使用 EventSource 连接 SSE 端点接收实时进度",
+    }
+
+
+def cancel_crawl_data(task_id: str) -> Dict[str, Any]:
+    """取消数据爬取任务"""
+    registry = get_task_registry()
+    task = registry.get_task(task_id)
+
+    if task is None:
+        return {"success": False, "error": f"Task not found: {task_id}"}
 
     success = registry.cancel_task(task_id)
 
     if success:
+        return {"success": True, "message": f"Task {task_id} cancelled"}
+
+    return {
+        "success": False,
+        "error": f"Cannot cancel task in status: {task.status.value}",
+    }
+
+
+def start_crawl_topics(
+    keywords_count: int = 100,
+    extract_date: str = None,
+    timeout: int = 600,
+    **kwargs,
+) -> Dict[str, Any]:
+    """提交热点话题提取任务（异步模式）"""
+    logger.info(f"MCP start_crawl_topics: count={keywords_count}, date={extract_date}")
+
+    registry = get_task_registry()
+
+    try:
+        task_id = registry.create_task(
+            task_type=TaskType.CRAWL_TOPICS.value,
+            params={
+                "keywords_count": keywords_count,
+                "extract_date": extract_date,
+            },
+            timeout=timeout,
+        )
+
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        executor.submit(
+            _run_crawl_topics_task,
+            task_id,
+            keywords_count,
+            extract_date,
+        )
+
         return {
             "success": True,
-            "message": f"Task {task_id} cancelled",
+            "task_id": task_id,
+            "status": "pending",
+            "message": "热点话题提取任务已提交，请使用 get_crawl_topics_status 查询进度",
+            "endpoints": {
+                "status": f"/mcp/task/{task_id}/status",
+                "result": f"/mcp/task/{task_id}/result",
+                "stream": f"/mcp/task/{task_id}/stream",
+                "cancel": f"/mcp/task/{task_id}/cancel",
+            },
         }
+
+    except RuntimeError as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "并发任务已满，请稍后再试",
+        }
+    except Exception as e:
+        logger.exception(f"Failed to start crawl topics task: {e}")
+        return {"success": False, "error": str(e)}
+
+
+def get_crawl_topics_status(task_id: str) -> Dict[str, Any]:
+    """查询热点话题提取进度"""
+    registry = get_task_registry()
+    status = registry.get_task_status(task_id)
+
+    if status is None:
+        return {"success": False, "error": f"Task not found: {task_id}"}
+
+    return {"success": True, **status}
+
+
+def get_crawl_topics_result(task_id: str) -> Dict[str, Any]:
+    """获取热点话题提取结果"""
+    registry = get_task_registry()
+    result = registry.get_task_result(task_id)
+
+    if result is None:
+        return {"success": False, "error": f"Task not found: {task_id}"}
+
+    return {"success": True, **result}
+
+
+def subscribe_crawl_topics(task_id: str) -> Dict[str, Any]:
+    """订阅热点话题提取 SSE 实时进度"""
+    registry = get_task_registry()
+    task = registry.get_task(task_id)
+
+    if task is None:
+        return {"success": False, "error": f"Task not found: {task_id}"}
+
+    return {
+        "success": True,
+        "stream_url": f"/mcp/task/{task_id}/stream",
+        "message": "请使用 EventSource 连接 SSE 端点接收实时进度",
+    }
+
+
+def cancel_crawl_topics(task_id: str) -> Dict[str, Any]:
+    """取消热点话题提取任务"""
+    registry = get_task_registry()
+    task = registry.get_task(task_id)
+
+    if task is None:
+        return {"success": False, "error": f"Task not found: {task_id}"}
+
+    success = registry.cancel_task(task_id)
+
+    if success:
+        return {"success": True, "message": f"Task {task_id} cancelled"}
+
+    return {
+        "success": False,
+        "error": f"Cannot cancel task in status: {task.status.value}",
+    }
+
+
+def start_crawl_social(
+    platforms: List[str],
+    max_keywords: int = 30,
+    max_notes: int = 20,
+    target_date: str = None,
+    test_mode: bool = False,
+    timeout: int = 3600,
+    **kwargs,
+) -> Dict[str, Any]:
+    """提交社交媒体爬取任务（异步模式）"""
+    logger.info(f"MCP start_crawl_social: platforms={platforms}")
+
+    normalized_platforms = [p.lower() for p in platforms]
+    for p in normalized_platforms:
+        if p not in SUPPORTED_PLATFORMS:
+            return {
+                "success": False,
+                "error": f"Unsupported platform: {p}. Supported: {list(SUPPORTED_PLATFORMS.keys())}",
+                "platforms": platforms,
+            }
+
+    registry = get_task_registry()
+
+    try:
+        task_id = registry.create_task(
+            task_type=TaskType.CRAWL_SOCIAL.value,
+            params={
+                "platforms": normalized_platforms,
+                "max_keywords": max_keywords,
+                "max_notes": max_notes,
+                "target_date": target_date,
+                "test_mode": test_mode,
+            },
+            timeout=timeout,
+        )
+
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        executor.submit(
+            _run_crawl_social_task,
+            task_id,
+            normalized_platforms,
+            max_keywords,
+            max_notes,
+            target_date,
+            test_mode,
+        )
+
+        return {
+            "success": True,
+            "task_id": task_id,
+            "status": "pending",
+            "message": "社交媒体爬取任务已提交，请使用 get_crawl_social_status 查询进度",
+            "endpoints": {
+                "status": f"/mcp/task/{task_id}/status",
+                "result": f"/mcp/task/{task_id}/result",
+                "stream": f"/mcp/task/{task_id}/stream",
+                "cancel": f"/mcp/task/{task_id}/cancel",
+            },
+        }
+
+    except RuntimeError as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "并发任务已满，请稍后再试",
+        }
+    except Exception as e:
+        logger.exception(f"Failed to start crawl social task: {e}")
+        return {"success": False, "error": str(e)}
+
+
+def get_crawl_social_status(task_id: str) -> Dict[str, Any]:
+    """查询社交媒体爬取进度"""
+    registry = get_task_registry()
+    status = registry.get_task_status(task_id)
+
+    if status is None:
+        return {"success": False, "error": f"Task not found: {task_id}"}
+
+    return {"success": True, **status}
+
+
+def get_crawl_social_result(task_id: str) -> Dict[str, Any]:
+    """获取社交媒体爬取结果"""
+    registry = get_task_registry()
+    result = registry.get_task_result(task_id)
+
+    if result is None:
+        return {"success": False, "error": f"Task not found: {task_id}"}
+
+    return {"success": True, **result}
+
+
+def subscribe_crawl_social(task_id: str) -> Dict[str, Any]:
+    """订阅社交媒体爬取 SSE 实时进度"""
+    registry = get_task_registry()
+    task = registry.get_task(task_id)
+
+    if task is None:
+        return {"success": False, "error": f"Task not found: {task_id}"}
+
+    return {
+        "success": True,
+        "stream_url": f"/mcp/task/{task_id}/stream",
+        "message": "请使用 EventSource 连接 SSE 端点接收实时进度",
+    }
+
+
+def cancel_crawl_social(task_id: str) -> Dict[str, Any]:
+    """取消社交媒体爬取任务"""
+    registry = get_task_registry()
+    task = registry.get_task(task_id)
+
+    if task is None:
+        return {"success": False, "error": f"Task not found: {task_id}"}
+
+    success = registry.cancel_task(task_id)
+
+    if success:
+        return {"success": True, "message": f"Task {task_id} cancelled"}
 
     return {
         "success": False,

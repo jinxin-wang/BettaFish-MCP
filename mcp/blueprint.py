@@ -446,6 +446,108 @@ def _get_tool_descriptions() -> dict:
                 "task_id": "任务ID (必填)",
             },
         },
+        "start_crawl_data": {
+            "description": "提交数据爬取任务（异步）",
+            "parameters": {
+                "keywords": "关键词列表 (必填)",
+                "platforms": "平台列表 (默认 [xhs, dy, wb])",
+                "max_keywords": "最大关键词数量 (默认50)",
+                "max_notes": "每个关键词最大爬取数量 (默认50)",
+                "test_mode": "测试模式 (默认False)",
+                "timeout": "超时时间秒 (默认3600)",
+            },
+        },
+        "get_crawl_data_status": {
+            "description": "查询数据爬取进度 (轮询模式)",
+            "parameters": {
+                "task_id": "任务ID (必填)",
+            },
+        },
+        "get_crawl_data_result": {
+            "description": "获取数据爬取结果",
+            "parameters": {
+                "task_id": "任务ID (必填)",
+            },
+        },
+        "subscribe_crawl_data": {
+            "description": "订阅数据爬取 SSE 实时进度",
+            "parameters": {
+                "task_id": "任务ID (必填)",
+            },
+        },
+        "cancel_crawl_data": {
+            "description": "取消数据爬取任务",
+            "parameters": {
+                "task_id": "任务ID (必填)",
+            },
+        },
+        "start_crawl_topics": {
+            "description": "提交热点话题提取任务（异步）",
+            "parameters": {
+                "keywords_count": "提取的关键词数量 (默认100)",
+                "extract_date": "提取日期 (YYYY-MM-DD)",
+                "timeout": "超时时间秒 (默认600)",
+            },
+        },
+        "get_crawl_topics_status": {
+            "description": "查询热点话题提取进度 (轮询模式)",
+            "parameters": {
+                "task_id": "任务ID (必填)",
+            },
+        },
+        "get_crawl_topics_result": {
+            "description": "获取热点话题提取结果",
+            "parameters": {
+                "task_id": "任务ID (必填)",
+            },
+        },
+        "subscribe_crawl_topics": {
+            "description": "订阅热点话题提取 SSE 实时进度",
+            "parameters": {
+                "task_id": "任务ID (必填)",
+            },
+        },
+        "cancel_crawl_topics": {
+            "description": "取消热点话题提取任务",
+            "parameters": {
+                "task_id": "任务ID (必填)",
+            },
+        },
+        "start_crawl_social": {
+            "description": "提交社交媒体爬取任务（异步）",
+            "parameters": {
+                "platforms": "平台列表 (必填)",
+                "max_keywords": "最大关键词数量 (默认30)",
+                "max_notes": "每个关键词最大爬取数量 (默认20)",
+                "target_date": "目标日期 (YYYY-MM-DD)",
+                "test_mode": "测试模式 (默认False)",
+                "timeout": "超时时间秒 (默认3600)",
+            },
+        },
+        "get_crawl_social_status": {
+            "description": "查询社交媒体爬取进度 (轮询模式)",
+            "parameters": {
+                "task_id": "任务ID (必填)",
+            },
+        },
+        "get_crawl_social_result": {
+            "description": "获取社交媒体爬取结果",
+            "parameters": {
+                "task_id": "任务ID (必填)",
+            },
+        },
+        "subscribe_crawl_social": {
+            "description": "订阅社交媒体爬取 SSE 实时进度",
+            "parameters": {
+                "task_id": "任务ID (必填)",
+            },
+        },
+        "cancel_crawl_social": {
+            "description": "取消社交媒体爬取任务",
+            "parameters": {
+                "task_id": "任务ID (必填)",
+            },
+        },
         "analyze_media": {
             "description": "分析视频/图片等多模态内容",
             "parameters": {
@@ -617,6 +719,21 @@ def _execute_tool(tool_name: str, arguments: dict) -> dict:
         "get_crawl_full_result": crawl_tool.get_crawl_full_result,
         "subscribe_crawl_full": crawl_tool.subscribe_crawl_full,
         "cancel_crawl_full": crawl_tool.cancel_crawl_full,
+        "start_crawl_data": crawl_tool.start_crawl_data,
+        "get_crawl_data_status": crawl_tool.get_crawl_data_status,
+        "get_crawl_data_result": crawl_tool.get_crawl_data_result,
+        "subscribe_crawl_data": crawl_tool.subscribe_crawl_data,
+        "cancel_crawl_data": crawl_tool.cancel_crawl_data,
+        "start_crawl_topics": crawl_tool.start_crawl_topics,
+        "get_crawl_topics_status": crawl_tool.get_crawl_topics_status,
+        "get_crawl_topics_result": crawl_tool.get_crawl_topics_result,
+        "subscribe_crawl_topics": crawl_tool.subscribe_crawl_topics,
+        "cancel_crawl_topics": crawl_tool.cancel_crawl_topics,
+        "start_crawl_social": crawl_tool.start_crawl_social,
+        "get_crawl_social_status": crawl_tool.get_crawl_social_status,
+        "get_crawl_social_result": crawl_tool.get_crawl_social_result,
+        "subscribe_crawl_social": crawl_tool.subscribe_crawl_social,
+        "cancel_crawl_social": crawl_tool.cancel_crawl_social,
         "start_forum_research": forum_tool.start_forum_research,
         "get_forum_progress": forum_tool.get_forum_progress,
         "get_forum_result": forum_tool.get_forum_result,

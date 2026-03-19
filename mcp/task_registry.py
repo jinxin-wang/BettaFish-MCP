@@ -29,6 +29,9 @@ class TaskType(str, Enum):
     MEDIA_FULL = "media_full"
     SENTIMENT_FULL = "sentiment_full"
     CRAWL_FULL = "crawl_full"
+    CRAWL_DATA = "crawl_data"
+    CRAWL_TOPICS = "crawl_topics"
+    CRAWL_SOCIAL = "crawl_social"
     FORUM_RESEARCH = "forum_research"
     REPORT = "report"
 
