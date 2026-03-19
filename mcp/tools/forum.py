@@ -389,15 +389,16 @@ def get_forum_discussion(task_id: str = None) -> Dict[str, Any]:
         }
     """
     try:
-        from ForumEngine.monitor import get_forum_log_content
+        from ForumEngine.monitor import get_monitor
 
-        content = get_forum_log_content()
+        monitor = get_monitor()
+        content = monitor.get_forum_log_content()
 
         return {
             "success": True,
             "discussion": content,
             "file": "logs/forum.log",
-            "lines": len(content.splitlines()) if content else 0,
+            "lines": len(content) if isinstance(content, list) else 0,
         }
 
     except Exception as e:

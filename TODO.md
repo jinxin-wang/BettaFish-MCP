@@ -425,11 +425,11 @@ class TaskRegistry:
 
 ### 8.3 Level 3 工具测试 (异步模式)
 
-- [ ] 8.3.1 测试 `start_forum_research` / `get_forum_progress` / `get_forum_result`
-- [ ] 8.3.2 测试 `subscribe_forum` SSE 订阅
-- [ ] 8.3.3 测试 `stop_forum_research`
-- [ ] 8.3.4 测试 `get_forum_discussion`
-- [ ] 8.3.5 测试 `start_report` / `get_report_status` / `get_report_result`
+- [x] 8.3.1 测试 `start_forum_research` / `get_forum_progress` / `get_forum_result`
+- [x] 8.3.2 测试 `subscribe_forum` SSE 订阅
+- [x] 8.3.3 测试 `stop_forum_research`
+- [x] 8.3.4 测试 `get_forum_discussion`
+- [x] 8.3.5 测试 `start_report` / `get_report_status` / `get_report_result`
 - [ ] 8.3.6 测试完整协作流程
 - [ ] 8.3.7 测试并发运行多个引擎
 
@@ -504,8 +504,8 @@ class TaskRegistry:
 | 五：异步任务基础设施 | 10 | 10 | 0 |
 | 六：Level 2 Tools | 37 | 37 | 0 |
 | 七：Level 3 Tools | 15 | 15 | 0 |
-| 八：测试 | 19 | 13 | 6 |
-| **总计** | **98** | **95** | **3** |
+| 八：测试 | 25 | 18 | 7 |
+| **总计** | **104** | **97** | **7** |
 
 ---
 

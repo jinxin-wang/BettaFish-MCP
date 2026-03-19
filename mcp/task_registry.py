@@ -167,7 +167,7 @@ class TaskRegistry:
     SUCCESS_TTL = 3600
     FAILED_TTL = 86400
     PENDING_TTL = 3600
-    MAX_CONCURRENT = 3
+    MAX_CONCURRENT = 10
 
     def __new__(cls):
         if cls._instance is None:
