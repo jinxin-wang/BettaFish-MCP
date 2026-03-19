@@ -389,7 +389,7 @@ class TaskRegistry:
 
 - [x] 7.6.1 添加 `bettafish://forum/engines` - ForumEngine引擎状态
 - [x] 7.6.2 添加 `bettafish://forum/roles` - 各Agent角色说明
-- [ ] 7.6.3 添加 `bettafish://forum/workflow` - 协作工作流程
+- [x] 7.6.3 添加 `bettafish://forum/workflow` - 协作工作流程
 
 ### 7.7 Prompts 扩展
 

@@ -110,6 +110,12 @@ class ResourceRegistry:
             description="各Agent角色说明",
             content_provider=self._get_forum_roles,
         )
+        self.register(
+            uri="bettafish://forum/workflow",
+            name="forum_workflow",
+            description="协作工作流程",
+            content_provider=self._get_forum_workflow,
+        )
 
     def _get_server_info(self) -> Dict[str, Any]:
         return {
@@ -426,6 +432,119 @@ class ResourceRegistry:
                     "4. 深度研究：各Agent基于主持人引导进行专项搜索",
                     "5. 循环迭代：重复步骤3-4直到所有Agent完成研究",
                 ],
+            },
+        }
+
+    def _get_forum_workflow(self) -> Dict[str, Any]:
+        return {
+            "workflow": {
+                "name": "ForumEngine 多Agent协作流程",
+                "description": "完整的多Agent协作舆情分析工作流程",
+                "phases": [
+                    {
+                        "phase": 1,
+                        "name": "并行启动",
+                        "description": "三个Agent同时开始工作",
+                        "agents": ["QUERY", "MEDIA", "INSIGHT"],
+                        "action": "各Agent使用专属工具进行概览搜索",
+                    },
+                    {
+                        "phase": 2,
+                        "name": "初步分析",
+                        "description": "各Agent进行初步分析并输出SummaryNode",
+                        "agents": ["QUERY", "MEDIA", "INSIGHT"],
+                        "action": "使用execute_search_tool进行单次搜索",
+                    },
+                    {
+                        "phase": 3,
+                        "name": "策略制定",
+                        "description": "基于初步结果制定分块研究策略",
+                        "agents": ["QUERY", "MEDIA", "INSIGHT"],
+                        "action": "各Agent内部决策模块制定研究计划",
+                    },
+                    {
+                        "phase": 4,
+                        "name": "论坛协作循环",
+                        "description": "ForumEngine监控并协调多轮讨论",
+                        "loop": True,
+                        "iterations": "直到所有Agent完成研究",
+                        "steps": [
+                            {
+                                "step": "4.1",
+                                "name": "深度研究",
+                                "description": "各Agent基于论坛主持人引导进行专项搜索",
+                                "agents": ["QUERY", "MEDIA", "INSIGHT"],
+                            },
+                            {
+                                "step": "4.2",
+                                "name": "论坛监控",
+                                "description": "LogMonitor监控三个引擎的日志文件",
+                                "monitor": "LogMonitor",
+                                "detects": "SummaryNode输出",
+                            },
+                            {
+                                "step": "4.3",
+                                "name": "论坛发言",
+                                "description": "捕获Agent研究总结，写入forum.log",
+                                "forum_log": "forum.log",
+                            },
+                            {
+                                "step": "4.4",
+                                "name": "主持人引导",
+                                "description": "每5条Agent发言触发ForumHost生成战略引导",
+                                "trigger": "5条发言",
+                                "host": "ForumHost (LLM主持人)",
+                            },
+                            {
+                                "step": "4.5",
+                                "name": "交流融合",
+                                "description": "各Agent使用forum_reader读取主持人引导",
+                                "tool": "forum_reader",
+                            },
+                        ],
+                    },
+                    {
+                        "phase": 5,
+                        "name": "结果整合",
+                        "description": "Report Agent收集所有分析结果和论坛内容",
+                        "agent": "ReportAgent",
+                    },
+                    {
+                        "phase": 6,
+                        "name": "报告生成",
+                        "description": "分块进行质量检测，渲染成交互式HTML报告",
+                        "agent": "ReportAgent",
+                    },
+                ],
+            },
+            "monitoring": {
+                "log_files": {
+                    "query": "query.log",
+                    "media": "media.log",
+                    "insight": "insight.log",
+                    "forum": "forum.log",
+                },
+                "detection": "LogMonitor检测SummaryNode输出以触发下一轮",
+                "trigger_interval": "每5条Agent发言触发一次主持人引导",
+            },
+            "async_tools": {
+                "start_forum_research": {
+                    "description": "启动ForumEngine + 3个Agent并行研究",
+                    "parameters": {
+                        "topic": "研究主题 (必填)",
+                        "engines": "启用的引擎列表 (默认全部)",
+                        "timeout": "超时时间 (秒, 默认1800)",
+                    },
+                },
+                "get_forum_progress": {
+                    "description": "查询论坛研究进度",
+                    "returns": "progress, engines状态, 发言数量",
+                },
+                "get_forum_discussion": {
+                    "description": "获取论坛讨论内容",
+                    "parameters": {"task_id": "任务ID", "limit": "返回条数"},
+                },
+                "stop_forum_research": {"description": "停止论坛研究"},
             },
         }
 
