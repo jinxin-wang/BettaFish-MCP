@@ -393,11 +393,11 @@ class TaskRegistry:
 
 ### 7.7 Prompts 扩展
 
-- [ ] 7.7.1 添加 `async_task_usage` - 异步任务使用指南
-- [ ] 7.7.2 添加 `forum_research` - 启动Forum多Agent协作研究
-- [ ] 7.7.3 添加 `forum_guidance` - 论坛主持人引导生成提示
-- [ ] 7.7.4 添加 `multi_agent_synthesis` - 多Agent结果综合分析
-- [ ] 7.7.5 添加 `final_report_generation` - 最终报告生成提示
+- [x] 7.7.1 添加 `async_task_usage` - 异步任务使用指南
+- [x] 7.7.2 添加 `forum_research` - 启动Forum多Agent协作研究
+- [x] 7.7.3 添加 `forum_guidance` - 论坛主持人引导生成提示
+- [x] 7.7.4 添加 `multi_agent_synthesis` - 多Agent结果综合分析
+- [x] 7.7.5 添加 `final_report_generation` - 最终报告生成提示
 
 ---
 

@@ -295,6 +295,262 @@ class PromptRegistry:
             )
         )
 
+        self.register(
+            MCPPrompt(
+                name="async_task_usage",
+                description="异步任务使用指南 - 如何使用Level 2/3异步工具",
+                arguments=[
+                    {
+                        "name": "tool_type",
+                        "description": "工具类型 (search_full/media_full/sentiment_full/crawl_data/crawl_topics/crawl_social)",
+                        "required": False,
+                    },
+                    {
+                        "name": "mode",
+                        "description": "获取进度模式 (poll/sse)",
+                        "required": False,
+                    },
+                ],
+                template="""异步任务使用指南：
+
+## 异步工具调用流程
+
+### 轮询模式 (Poll)
+1. 使用 start_* 工具提交任务，获得 task_id
+   - 返回: {{"success": true, "task_id": "xxx", "status": "pending"}}
+2. 使用 get_*_status 查询进度
+   - 返回: {{"progress": 45, "stage": "reflection_loop", "status": "running"}}
+3. 当 status 变为 "completed" 时，使用 get_*_result 获取结果
+   - 返回: {{"status": "completed", "result": {{...}}}}
+
+### SSE 模式 (实时推送)
+1. 使用 start_* 工具提交任务
+2. 使用 subscribe_* 工具获取 SSE 流 URL
+3. 接收实时进度推送事件
+4. 事件类型: progress / completed / failed / cancelled
+
+### 取消任务
+- 使用 cancel_* 工具可随时取消运行中的任务
+
+工具类型: {tool_type if tool_type else '所有异步工具'}
+获取模式: {mode if mode else '轮询'}
+""",
+            )
+        )
+
+        self.register(
+            MCPPrompt(
+                name="forum_research",
+                description="启动Forum多Agent协作研究",
+                arguments=[
+                    {"name": "topic", "description": "研究主题", "required": True},
+                    {
+                        "name": "engines",
+                        "description": "启用的引擎 (query/media/insight, 默认全部)",
+                        "required": False,
+                    },
+                    {
+                        "name": "max_reflections",
+                        "description": "最大反思轮数 (默认3)",
+                        "required": False,
+                    },
+                ],
+                template="""启动ForumEngine多Agent协作研究：
+
+研究主题: {topic}
+启用引擎: {engines if engines else 'query, media, insight'}
+反思轮数: {max_reflections if max_reflections else 3}
+
+## 研究流程
+
+1. 使用 start_forum_research 提交任务
+   - 三个Agent (Query/Media/Insight) 将并行开始工作
+   - ForumEngine主持人将协调多轮讨论
+
+2. 使用 get_forum_progress 监控研究进度
+   - 查看各引擎的研究状态
+   - 了解论坛发言数量
+
+3. 使用 get_forum_discussion 获取讨论内容
+   - 查看QUERY/MEDIA/INSIGHT/HOST各方的发言
+   - 理解各Agent的研究发现
+
+4. 使用 subscribe_forum 订阅实时进度 (SSE模式)
+
+5. 研究完成后使用 get_forum_result 获取综合报告
+
+## 注意事项
+- 完整研究可能需要10-30分钟
+- 可随时使用 stop_forum_research 停止研究
+""",
+            )
+        )
+
+        self.register(
+            MCPPrompt(
+                name="forum_guidance",
+                description="论坛主持人引导生成提示 - ForumHost生成战略引导的提示词",
+                arguments=[
+                    {"name": "topic", "description": "研究主题", "required": True},
+                    {
+                        "name": "recent_speeches",
+                        "description": "最近的Agent发言内容",
+                        "required": True,
+                    },
+                    {
+                        "name": "research_phase",
+                        "description": "当前研究阶段",
+                        "required": False,
+                    },
+                ],
+                template="""作为论坛主持人，请分析以下Agent发言并生成战略引导：
+
+研究主题: {topic}
+当前阶段: {research_phase if research_phase else '多轮反思循环中'}
+
+## Agent发言摘要:
+{recent_speeches}
+
+## 引导生成要求
+
+1. 分析各Agent的研究发现：
+   - 识别共同关注点
+   - 发现研究空白
+   - 指出矛盾或分歧
+
+2. 生成战略引导：
+   - 指出下一步研究方向
+   - 提出需要深化的具体问题
+   - 建议Agent之间的协作角度
+
+3. 引导风格：
+   - 简洁明了，不超过200字
+   - 聚焦战略层面，不涉及具体操作
+   - 鼓励多元视角和深入分析
+
+请生成下一轮的战略引导发言。
+""",
+            )
+        )
+
+        self.register(
+            MCPPrompt(
+                name="multi_agent_synthesis",
+                description="多Agent结果综合分析 - 综合三个Agent的研究结果",
+                arguments=[
+                    {"name": "topic", "description": "研究主题", "required": True},
+                    {
+                        "name": "query_results",
+                        "description": "QueryEngine研究结果",
+                        "required": False,
+                    },
+                    {
+                        "name": "media_results",
+                        "description": "MediaEngine研究结果",
+                        "required": False,
+                    },
+                    {
+                        "name": "insight_results",
+                        "description": "InsightEngine研究结果",
+                        "required": False,
+                    },
+                ],
+                template="""综合分析多Agent研究结果：
+
+研究主题: {topic}
+
+## QueryEngine发现:
+{query_results if query_results else '等待QueryEngine研究结果...'}
+
+## MediaEngine发现:
+{media_results if media_results else '等待MediaEngine研究结果...'}
+
+## InsightEngine发现:
+{insight_results if insight_results else '等待InsightEngine研究结果...'}
+
+## 综合分析任务
+
+1. 交叉验证：
+   - 识别三个引擎发现中的共同趋势
+   - 对比不同数据源的一致性
+   - 发现被单一引擎忽视的重要信息
+
+2. 补充分析：
+   - 识别各引擎的独特贡献
+   - 补充信息空白
+   - 构建完整的舆情画像
+
+3. 洞察提炼：
+   - 提取关键发现和洞察
+   - 识别风险和机会
+   - 提出建议和行动项
+
+4. 生成综合报告供ReportEngine使用
+""",
+            )
+        )
+
+        self.register(
+            MCPPrompt(
+                name="final_report_generation",
+                description="最终报告生成提示 - 指导生成最终综合报告",
+                arguments=[
+                    {"name": "topic", "description": "报告主题", "required": True},
+                    {
+                        "name": "template",
+                        "description": "报告模板 (standard/crisis/hot_topic/competitor/platform)",
+                        "required": False,
+                    },
+                    {
+                        "name": "synthesis",
+                        "description": "多Agent综合分析结果",
+                        "required": False,
+                    },
+                    {
+                        "name": "format",
+                        "description": "输出格式 (html/json/pdf)",
+                        "required": False,
+                    },
+                ],
+                template="""生成最终综合报告：
+
+报告主题: {topic}
+报告模板: {template if template else 'standard'}
+输出格式: {format if format else 'html'}
+
+## 综合分析结果:
+{synthesis if synthesis else '等待多Agent综合分析完成...'}
+
+## 报告生成流程
+
+1. 数据收集：
+   - 汇总QueryEngine新闻搜索结果
+   - 汇总MediaEngine多模态分析结果
+   - 汇总InsightEngine舆情情感结果
+   - 整合ForumEngine论坛讨论洞察
+
+2. 报告结构：
+   - 执行摘要 (关键发现)
+   - 舆情概况 (数据概览)
+   - 深度分析 (各维度分析)
+   - 趋势预测 (未来展望)
+   - 建议行动 (下一步)
+
+3. 质量检测：
+   - 检查数据完整性和准确性
+   - 确保分析逻辑连贯
+   - 验证结论有数据支撑
+
+4. 渲染输出：
+   - 使用选定模板渲染报告
+   - 生成交互式HTML报告
+   - 保存到指定目录
+
+使用 start_report 工具启动报告生成流程。
+""",
+            )
+        )
+
     def register(self, prompt: MCPPrompt):
         self._prompts[prompt.name] = prompt
 
