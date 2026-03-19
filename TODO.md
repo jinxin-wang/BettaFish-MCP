@@ -405,7 +405,7 @@ class TaskRegistry:
 
 ### 8.1 Level 1 工具测试
 
-- [ ] 8.1.1 测试 `search_news`
+- [x] 8.1.1 测试 `search_news`
 - [ ] 8.1.2 测试 `analyze_media`
 - [ ] 8.1.3 测试 `query_sentiment`
 - [ ] 8.1.4 测试 `check_spider_status`
